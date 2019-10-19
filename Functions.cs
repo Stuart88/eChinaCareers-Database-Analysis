@@ -85,7 +85,7 @@ namespace DatabaseAnalysis
 
             List<(string word, int count)> words = new List<(string word, int count)>();
 
-            string jobPostHTMLstripped = "";
+            string entry_HTMLstripped = "";
 
             foreach (string jobContent in htmlContent)
             {
@@ -96,9 +96,13 @@ namespace DatabaseAnalysis
 
                 try
                 {
+                    //Lazy... Use try/catch to avoid null reference errors...
+
                     foreach (HtmlNode node in doc.DocumentNode.SelectNodes("//text()"))
                     {
-                        jobPostHTMLstripped += node.InnerText.Replace(@"\t", "");
+                        //Strip HTML tags from entry
+
+                        entry_HTMLstripped += node.InnerText.Replace(@"\t", "");
                     }
                 }
                 catch (Exception e)
@@ -106,7 +110,9 @@ namespace DatabaseAnalysis
                     Console.WriteLine("Error! {0}", e.Message);
                 }
 
-                foreach (string s in jobPostHTMLstripped.Split(' '))
+                //Add or update count for each word
+
+                foreach (string s in entry_HTMLstripped.Split(' '))
                 {
                     if (words.Any(x => x.word == s))
                     {
@@ -121,7 +127,9 @@ namespace DatabaseAnalysis
                     }
                 }
 
-                jobPostHTMLstripped = "";
+                entry_HTMLstripped = "";
+
+                // Visually mark progress...
 
                 count++;
                 if (count % 20 == 0)
@@ -133,6 +141,8 @@ namespace DatabaseAnalysis
             words = words.OrderBy(x => x.count).ToList();
 
             words.Sort((a, b) => b.count.CompareTo(a.count));
+
+            // Write top 200 to text file.
 
             File.WriteAllLines(outputFileName, words.Take(200).Select(s => string.Format("{0}: {1}", s.count, s.word)).ToList());
         }
