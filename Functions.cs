@@ -53,7 +53,10 @@ namespace DatabaseAnalysis
 
                              useful = ((double)(from r in cands
                                                 where r.Nationality == grp.Key
-                                                && r.Potential == (int)CandidatePotential.Potential
+                                                 && (
+                                              r.Potential == (int)CandidatePotential.Potential
+                                              || r.Potential == (int)CandidatePotential.Deferred
+                                              )
                                                 select r).Count() / grp.Count()) * 100
                          })
                          .OrderByDescending(x => x.count > 10)
